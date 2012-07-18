@@ -1,0 +1,3 @@
+If a system has been modelled in multiple independent parts (whether they are called files, modules, or regions), without an original plan to connect those parts together, it should be possible to go in later and connect the parts.
+
+Source: [[https://tracker.physiomeproject.org/show_bug.cgi?id=379]]
