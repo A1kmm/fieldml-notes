@@ -9,3 +9,66 @@ This proposal aims to be a proposal for a future version of FieldML that makes n
 - Fields
     - InbuiltField
     - MathematicalField
+
+# Namespaces:
+## Concepts
+Objects (fields, domains, etc...) have identifiers in zero or more namespaces. Only one object can use each name in each namespace; different objects cannot have the same identifier in the same namespace, even if they are of different types.
+
+Namespaces are themselves objects, and so can have identifiers in other namespaces.
+
+Namespaces can be explicitly declared, but they are also created implicitly by various syntactic constructs. For example, every domain and every field is also a namespace.
+
+The namespacing scheme is used solely to name and access objects; being in a namespace does not imply anything about how the fields should be computed, nor about the semantic meaning of the contents of each namespace.
+
+An identifier becomes a member of a namespace by:
+  1. being declared within the syntactic range of that namespace, or,
+  2. being imported into that namespace using an import statement (as defined below).
+
+## Paths
+A path is the term used for a reference to a symbol; they are part of the syntax of the language, and the meaning depends on the position in the file in which they appear. However, once a path has been resolved to an object, the path has no further effect on the interpretation.
+
+A number of path types are possible:
+- Relative paths. Relative paths shown in this document begin with an identifier segment. This first identifier segment is looked up by starting in the namespace in which the path appears, and looking for the identifier. If it is not found, the namespace which is syntactically the parent of the namespace is checked, and so on until the identifier is found or the root namespace in the file has been checked. Once an identifier matching the first segment is found, each subsequent segment is looked up in the namespace found by matching the previous segment.
+- Absolute paths. Absolute paths shown in this document begin with ::, and then have a relative path. Such paths indicate that the object should be found by starting at the root namespace of the current file, and resolving the relative path from the root rather than the context namespace in which the path appears.
+
+### Examples
+    object myO -- First O object
+    namespace A {
+      object myO -- Second O object
+      namespace B {
+        object myO -- Third O object
+        namespace C {
+          valid-path myO -- Refers to 'Third O object'.
+          valid-path ::myO -- Refers to 'First O object'.
+          valid-path A::myO -- Refers to 'Second O object'.
+          valid-path A::B::myO -- Refers to 'Third O object'.
+          invalid-path ::B::myO -- Invalid, no B in top-level.
+        }
+      }
+    }
+    namespace D {
+      valid-path A -- Refers to the namespace.
+      valid-path A::B::myO -- Third O object.
+    }
+
+## Imports
+The import statement carries the following information:
+    Import from *URL* *namespacePath* (*listOfSymbols*) hiding (*listOfSymbols*) as *localid*
+
+The "as *localid*" is optional - if present, it is a synonym for declaring a namespace localid and placing the import without it. e.g.
+    Import from "http://example.org/mymodel.xml" Test::MyNamespace as MyTest
+is a synonym for:
+    namespace MyTest {
+      Import from "http://example.org/mymodel.xml" Test::MyNamespace
+    }
+Either form takes all symbols from namespace Test::MyNamespace in http://example.org/mymodel.xml and puts them in local namespace MyTest.
+
+The "from *URL*" may be omitted, in which case the import refers to the current file. If "from *URL*" is not omitted, *namespacePath* may either be a relative or an absolute path, and is interpreted relative to the current position. If "from *URL*" is present, it must be a relative path, but it will be interpreted relative to the root.
+
+The first (*listOfSymbols*) is optional; if present, it lists the symbols to import, but if absent, all symbols not explicitly hidden are imported.
+
+The "hiding (*listOfSymbols*)" is also optional, and may only be present if the first (*listOfSymbols*) is omitted. It lists symbols not to import.
+
+Each member of a *listOfSymbols* must be an individual name to import; it cannot be a path. Symbols are separated by ,.
+
+An identifier that is imported into a namespace behaves in exactly the same way as an identifier that was defined in the namespace in all respects; there are merely two names for the same thing.
