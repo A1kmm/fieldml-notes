@@ -1,4 +1,4 @@
-List of Usecases:
+List of use cases:
 
 - [Usecases/SpanningRegions]() - Creating modules by composing different parts.
 - [Usecases/RelateSubdomains]() - Relate two different subdomains of two different domains
