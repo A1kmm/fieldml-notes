@@ -1,9 +1,9 @@
-List of Usecases
-* [Usecases/SpanningRegions]() - Creating modules by composing different parts.
-* [Usecases/RelateSubdomains]() - Relate two different subdomains of two different domains
-* [Usecases/LowerDimensionalSubdomain]() - Describe fields over a lower dimensional subdomain (e.g. an edge or face of a 3D domain).
-* [Usecases/TimeVaryingField]() - Describe fields that vary over domains such as time.
-* [Usecases/AdaptiveMeshRefinement]() - Hierarchical meshes and adaptive mesh refinement.
-* [Usecases/DiscontinuityBetweenElements]() - Field discontinuity between adjacent elements.
-* [Usecases/ContinuityBetweenElements]() - Field continuity between adjacent elements.
-* [Usecases/MultipleElementsCommonNode]() - Multiple elements in the domain share a common node.
+List of Usecases:
+- [Usecases/SpanningRegions]() - Creating modules by composing different parts.
+- [Usecases/RelateSubdomains]() - Relate two different subdomains of two different domains
+- [Usecases/LowerDimensionalSubdomain]() - Describe fields over a lower dimensional subdomain (e.g. an edge or face of a 3D domain).
+- [Usecases/TimeVaryingField]() - Describe fields that vary over domains such as time.
+- [Usecases/AdaptiveMeshRefinement]() - Hierarchical meshes and adaptive mesh refinement.
+- [Usecases/DiscontinuityBetweenElements]() - Field discontinuity between adjacent elements.
+- [Usecases/ContinuityBetweenElements]() - Field continuity between adjacent elements.
+- [Usecases/MultipleElementsCommonNode]() - Multiple elements in the domain share a common node.
