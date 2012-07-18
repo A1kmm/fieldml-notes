@@ -1,0 +1,11 @@
+# List of alternatives based off this proposal
+# Abstract
+This proposal aims to be a proposal for a future version of FieldML that makes no attempt to be minor or incremental; the idea is to demonstrate what direction we should aim for, rather than what software could implement quickly with minimal changes.
+
+# Core syntactic concepts:
+- Namespaces
+- Domains
+  - CloneDomain
+- Fields
+  - InbuiltField
+  - MathematicalField
