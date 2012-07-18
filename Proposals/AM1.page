@@ -1,4 +1,4 @@
-# List of alternatives based off this proposal
+# List of incremental change proposals based off this proposal
 # Abstract
 This proposal aims to be a proposal for a future version of FieldML that makes no attempt to be minor or incremental; the idea is to demonstrate what direction we should aim for, rather than what software could implement quickly with minimal changes.
 
@@ -53,17 +53,22 @@ A number of path types are possible:
 
 ## Imports
 The import statement carries the following information:
+
     Import from *URL* *namespacePath* (*listOfSymbols*) hiding (*listOfSymbols*) as *localid*
 
 The "as *localid*" is optional - if present, it is a synonym for declaring a namespace localid and placing the import without it. e.g.
+
     Import from "http://example.org/mymodel.xml" Test::MyNamespace as MyTest
+
 is a synonym for:
+
     namespace MyTest {
       Import from "http://example.org/mymodel.xml" Test::MyNamespace
     }
+
 Either form takes all symbols from namespace Test::MyNamespace in http://example.org/mymodel.xml and puts them in local namespace MyTest.
 
-The "from *URL*" may be omitted, in which case the import refers to the current file. If "from *URL*" is not omitted, *namespacePath* may either be a relative or an absolute path, and is interpreted relative to the current position. If "from *URL*" is present, it must be a relative path, but it will be interpreted relative to the root.
+The "from *URL*" may be omitted, in which case the import refers to the current file. If "from *URL*" is not omitted, *namespacePath* may either be a relative or an absolute path, and is interpreted relative to the current position. If "from *URL*" is present, *namespacePath* may either be a relative or an absolute path, but it will always be interpreted relative to the root.
 
 The first (*listOfSymbols*) is optional; if present, it lists the symbols to import, but if absent, all symbols not explicitly hidden are imported.
 
@@ -72,3 +77,70 @@ The "hiding (*listOfSymbols*)" is also optional, and may only be present if the 
 Each member of a *listOfSymbols* must be an individual name to import; it cannot be a path. Symbols are separated by ,.
 
 An identifier that is imported into a namespace behaves in exactly the same way as an identifier that was defined in the namespace in all respects; there are merely two names for the same thing.
+
+# Domains:
+
+## Abstract conceptual domain
+
+A domain is an abstract object (i.e. cannot be declared directly without using one of the more specialised domains) that has a conceptual (and possibly infinite) sets called the label set and the value set. There is a surjective relationship between the label set and the value set; in other words, every value has at least one label, the same value can have labels, but the same label cannot have multiple values.
+
+The fact that two values are members of the same domain, or are members of different domains, does not imply anything about the physical meanings of those values; that interpretation can instead be supplied from other context such as comments or metadata in the file about the physical meaning.
+
+Instead, the domains exists to constrain what conversions will happen automatically, and to specify how the conversions occur, to reduce the risk of modeller error. They play a synonymous role to what type systems do in programming languages; much of the theory for domain inference is borrowed from Hindley-Milner type inference.
+
+The choice of when to use a different domain (for example, using the clone facilities discussed below), and when to use the same domain is one for the modeller, and there are significant questions of degree that feed into that decision. For example, it might make sense to make the X, Y, and Z axes in a 3 dimensional space their own domains, but in a 10,000 dimensional problem, or in a problem where the dimensionality is unknown, the modeller is unlikely to be writing the model in terms of explicitly named dimensions, and so there would be little benefit in creating a separate domain for each dimension.
+
+The language is entirely statically typed and monomorphic with respect to domain. This means that every single field in a file has a domain type signature. Type variables are allowed (as discussed below) in fields that exist purely to support other fields, but only fields containing no type variables can actually appear in fields that can be evaluated.
+
+## Point domain
+There is a built in domain called the Point domain. It can be referred to from anywhere as a matter of syntax, without any need to import. It is also referred to as {} within this document, because of its special relationship to the Product domain.
+
+It has one label and one value; this is referred to as {} within this document.
+
+## Real domain
+There is a built in domain called the Real domain. It can be referred to from anywhere as a matter of syntax, without any need to import.
+
+Literal numbers, represented as a series of digits, optionally followed by a decimal point and more digits, are treated as built-in fields from Point onto values of the Real domain.
+
+## Clone domain
+A clone domain creates a new domain from an existing domain. The point space will be of identical cardinality, the label space will be the same, and the mapping from point to label space will correspond exactly.
+
+    Import from "http://fieldml.org/library/builtin" :: (Real)
+    CloneDomain XMetres from Real
+    CloneDomain YMetres from Real
+
+In the above example, XMetres and YMetres are new domains which may take the same values as Real can. A value of XMetres can be implicitly converted to Real, but a value of Real cannot be implicitly converted to a value of XMetres. A value of XMetres cannot be converted implicitly to a value of YMetres.
+
+The special operator asclone C (where C is a path to a CloneDomain) produces a field 
+
+    WhatCWasClonedFrom -> C
+
+The special operator unclone C (where C is a path to a CloneDomain) produces a field
+
+    C -> WhatCWasClonedFrom
+
+For example, where . denotes domain composition:
+
+    f :: SomeDomain -> XMetres
+    -- Some definition for f here.
+    g :: SomeDomain -> YMetres
+    -- You could write it like this:
+    g = (asclone YMetres) . (unclone XMetres) . f
+    -- but the unclone is unnecessary in this case, since XMetres can be converted to Real implicitly:
+    g = (asclone XMetres) . f
+    -- The following would be invalid, because it is trying to convert XMetres to YMetres implicitly.
+    g = f
+
+## Ensemble domain
+
+An ensemble domain is ...
+
+## Product domain
+
+The product domain makes a domain which has as its value space the cartesian product of the value space of the parts, and as the label space, has the cartesian product of the label spaces of the parts. Each part has a named label.
+
+If you declare the exact 
+
+Syntax used here:
+
+   {}
