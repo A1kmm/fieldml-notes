@@ -5,7 +5,7 @@ This proposal aims to be a proposal for a future version of FieldML that makes n
 # Core syntactic concepts:
 - Namespaces
 - Domains
-  - CloneDomain
+    - CloneDomain
 - Fields
-  - InbuiltField
-  - MathematicalField
+    - InbuiltField
+    - MathematicalField
