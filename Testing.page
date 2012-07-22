@@ -1,0 +1,7 @@
+This is a test[^AMTest]. ABCDEF.
+
+[^AMTest]: Here is a comment on the test.
+
+We then continue here.
+
+End of changes.
