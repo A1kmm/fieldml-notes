@@ -2,7 +2,7 @@
 # Abstract
 This proposal aims to be a proposal for a future version of FieldML that makes no attempt to be minor or incremental; the idea is to demonstrate what direction we should aim for, rather than what software could implement quickly with minimal changes.
 
-# Core syntactic concepts:
+# Core syntactic concepts
 - Namespaces
 - Domains
     - CloneDomain
@@ -10,7 +10,7 @@ This proposal aims to be a proposal for a future version of FieldML that makes n
     - InbuiltField
     - MathematicalField
 
-# Namespaces:
+# Namespaces
 ## Concepts
 Objects (fields, domains, etc...) have identifiers in zero or more namespaces. Only one object can use each name in each namespace; different objects cannot have the same identifier in the same namespace, even if they are of different types.
 
@@ -73,7 +73,7 @@ Each member of a *listOfSymbols* must be an individual name to import; it cannot
 
 An identifier that is imported into a namespace behaves in exactly the same way as an identifier that was defined in the namespace in all respects; there are merely two names for the same thing.
 
-# Domains:
+# Domains
 
 ## Abstract conceptual domain
 
@@ -201,7 +201,7 @@ In this document, the following notation is used to define a new domain E by cha
 
     E = ConnectDomain D using [f1, f2, f3]
 
-Each field $f_i$ must map from a subset of D, $S_i \subset D$ to D. The $f_i$ fields must not produce output values in $S_1 \union ... \union S_n $. The meaning is that if $l_1$ and $l_2$ are two point labels in E, they are the same point if $l_1 = l_2$ or if $f_i(l_1) = f_j(l_2)$ for some i, j.
+Each field $f_i$ must map from a subset of D, $S_i \subset D$ to D. The $f_i$ fields must not produce output values in $S_1 \cap ... \cap S_n $. The meaning is that if $l_1$ and $l_2$ are two point labels in E, they are the same point if $l_1 = l_2$ or if $f_i(l_1) = f_j(l_2)$ for some i, j.
 
 For example, we can use the ConnectDomain to fix the issue mentioned above where the previous attempt to define PointsOnAxes treats (XMetres 0) as a different point to (YMetres 0):
 
