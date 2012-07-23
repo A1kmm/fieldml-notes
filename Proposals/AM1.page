@@ -97,19 +97,19 @@ There is a built in domain called the Point domain. It can be referred to from a
 
 It has one label and one value; this is referred to as {} within this document.
 
-## Real domain
-There is a built in domain called the Real domain. It can be referred to from anywhere as a matter of syntax, without any need to import.
+## Reals domain
+There is a built in domain called the Reals domain. It can be referred to from anywhere as a matter of syntax, without any need to import.
 
-Literal numbers, represented as a series of digits, optionally followed by a decimal point and more digits, are treated as built-in fields from Point onto values of the Real domain.
+Literal numbers, represented as a series of digits, optionally followed by a decimal point and more digits, are treated as built-in fields from Point onto values of the Reals domain.
 
 ## Clone domain
 A clone domain creates a new domain from an existing domain. The point space will be of identical cardinality, the label space will be the same, and the mapping from point to label space will correspond exactly.
 
-    Import from "http://fieldml.org/library/builtin" :: (Real)
-    CloneDomain XMetres from Real
-    CloneDomain YMetres from Real
+    Import from "http://fieldml.org/library/builtin" :: (Reals)
+    CloneDomain XMetres from Reals
+    CloneDomain YMetres from Reals
 
-In the above example, XMetres and YMetres are new domains which may take the same values as Real can. A value of XMetres can be implicitly converted to Real, but a value of Real cannot be implicitly converted to a value of XMetres. A value of XMetres cannot be converted implicitly to a value of YMetres.
+In the above example, XMetres and YMetres are new domains which may take the same values as Reals can. A value of XMetres can be implicitly converted to a value of Reals, but a value of Reals cannot be implicitly converted to a value of XMetres. A value of XMetres cannot be converted implicitly to a value of YMetres.
 
 The special operator asclone C (where C is a path to a CloneDomain) produces a field 
 
@@ -126,7 +126,7 @@ For example, where . denotes domain composition:
     g :: SomeDomain -> YMetres
     -- You could write it like this:
     g = (asclone YMetres) . (unclone XMetres) . f
-    -- but the unclone is unnecessary in this case, since XMetres can be converted to Real implicitly:
+    -- but the unclone is unnecessary in this case, since XMetres can be converted to Reals implicitly:
     g = (asclone XMetres) . f
     -- The following would be invalid, because it is trying to convert XMetres to YMetres implicitly.
     g = f
