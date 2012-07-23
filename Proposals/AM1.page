@@ -33,23 +33,19 @@ A number of path types are possible:
 
 ### Examples
     object myO -- First O object
-    namespace A {
+    namespace A where
       object myO -- Second O object
-      namespace B {
+      namespace B where
         object myO -- Third O object
-        namespace C {
+        namespace C where
           valid-path myO -- Refers to 'Third O object'.
           valid-path ::myO -- Refers to 'First O object'.
           valid-path A::myO -- Refers to 'Second O object'.
           valid-path A::B::myO -- Refers to 'Third O object'.
           invalid-path ::B::myO -- Invalid, no B in top-level.
-        }
-      }
-    }
-    namespace D {
+    namespace D where
       valid-path A -- Refers to the namespace.
       valid-path A::B::myO -- Third O object.
-    }
 
 ## Imports
 The import statement carries the following information:
@@ -62,9 +58,8 @@ The "as *localid*" is optional - if present, it is a synonym for declaring a nam
 
 is a synonym for:
 
-    namespace MyTest {
+    namespace MyTest where
       Import from "http://example.org/mymodel.xml" Test::MyNamespace
-    }
 
 Either form takes all symbols from namespace Test::MyNamespace in http://example.org/mymodel.xml and puts them in local namespace MyTest.
 
@@ -92,6 +87,8 @@ The choice of when to use a different domain (for example, using the clone facil
 
 The language is entirely statically typed and monomorphic with respect to domain. This means that every single field in a file has a domain type signature. Type variables are allowed (as discussed below) in fields that exist purely to support other fields, but only fields containing no type variables can actually appear in fields that can be evaluated.
 
+Every domain is implicitly also a namespace.
+
 ## Point domain
 There is a built in domain called the Point domain. It can be referred to from anywhere as a matter of syntax, without any need to import. It is also referred to as {} within this document, because of its special relationship to the Product domain.
 
@@ -111,13 +108,15 @@ A clone domain creates a new domain from an existing domain. The point space wil
 
 In the above example, XMetres and YMetres are new domains which may take the same values as Reals can. A value of XMetres can be implicitly converted to a value of Reals, but a value of Reals cannot be implicitly converted to a value of XMetres. A value of XMetres cannot be converted implicitly to a value of YMetres.
 
+A CloneDomain implicitly imports everything 
+
 The special operator asclone C (where C is a path to a CloneDomain) produces a field 
 
-    WhatCWasClonedFrom -> C
+    asclone C :: WhatCWasClonedFrom -> C
 
 The special operator unclone C (where C is a path to a CloneDomain) produces a field
 
-    C -> WhatCWasClonedFrom
+    unclone C :: C -> WhatCWasClonedFrom
 
 For example, where . denotes domain composition:
 
@@ -133,14 +132,64 @@ For example, where . denotes domain composition:
 
 ## Ensemble domain
 
-An ensemble domain is ...
+An ensemble domain is a set of labelled points; defining an ensemble defines both the labels and a disjoint union domain (see below) set that can take any value from that set.
+
+In this document, a new ensemble domain E is denoted as:
+
+    E = Ensemble label1 label2 label3
+
+The labels become members of the namespace E, and the domain E can be used as if it was a disjoint union domain over those labels.
+
+In addition to explicitly declare ensemble domains, every domain has an implicit anonymous ensemble containing only one label. There is no way to reference this ensemble as a domain, but the labels can be referenced simply by using the domain name in a context where a label is expected. In the above example, E::label1 is a label in domain E, and E is a label in an anonymous domain. This specification has been designed so there can never be any ambiguity between the domain E and the label E.
 
 ## Product domain
 
-The product domain makes a domain which has as its value space the cartesian product of the value space of the parts, and as the label space, has the cartesian product of the label spaces of the parts. Each part has a named label.
+The product domain makes a domain which has as its value space the cartesian product of the value space of the parts, and as the label space, has the cartesian product of the label spaces of the parts. Each part has a named label. The labels must be scoped, and must have previously been defined using Ensemble domain constructors. It is not necessary that all labels were originally defined in the same ensemble.
 
-If you declare the exact 
+If you declare the exact same product domain twice (i.e. with the exact same labels and domains, where labels are determined to be the same by what label reference rather than by string comparison), you get an indistinguishable domain which can be used interchangeably.
 
-Syntax used here:
+In this document, the syntax { label1: domain1, label2: domain2, label3: domain3 } is used for product domains. The product domain over nothing ({}) is indistinguishable from the point domain. It is possible to define a product domain of only one thing, { label1: domain1 }. This is not identical to domain1, because it has a label (but can be converted, as discussed in another section).
 
-   {}
+If you omit one or more labels, the default is the label that was defined implicitly for the domain.
+
+Examples:
+
+    SpaceAxes = Ensemble X Y Z
+    XMetres = CloneDomain Reals
+    YMetres = CloneDomain Reals
+    ZMetres = CloneDomain Reals
+    # Explicitly labelling spatial points...
+    SpatialPoints = { SpaceAxes::X : XMetres, SpaceAxes::Y : YMetres, SpaceAxes::Z : ZMetres }
+    # An alternative (but incompatible for conversion) definition:
+    SpatialPoints2 = { XMetres, YMetres, ZMetres}
+    # This is equivalent (and compatible for conversion) to:
+    SpatialPoints3 = { XMetres : XMetres, YMetres : YMetres, ZMetres : ZMetres}
+    # Now we can extend it to a new dimension; see the conversion rules to understand the utility of this.
+    TimeAxis = Ensemble T
+    TSeconds = CloneDomain Reals
+    SpaceTimePoints = { SpaceAxes::X : XMetres, SpaceAxes::Y : YMetres, SpaceAxes::Z : ZMetres, TimeAxis::T : TSeconds }
+    # Alternatively (but incompatibly)...
+    SpaceTimePoints2 = { SpatialPoints, TimeAxis::T : TSeconds }
+
+### The disjoint union domain
+
+The disjoint union domain constructor creates a domain where every point is associated with exactly one label, and the remaining data carried by the point is determined by the label; in other words, the space of the disjoint union is the union of the spaces of all the constituent parts after a label is attached to all the points in each constituent domain to make the constituent domains disjoint.
+
+New disjoint union domains are denoted here using the following notation:
+
+    D = ( label1 : domain1 | label2 : domain2 | label3 : domain3 )
+
+If you declare the exact same disjoint union domain twice (i.e. with the exact same labels and domains, where labels are determined to be the same by what label reference rather than by string comparison), you get an indistinguishable domain which can be used interchangeably. Note that this applies between the disjoint union domains defined using Ensemble as well (for an Ensemble, the domain corresponding to every label is {}).
+
+If you omit one or more labels, the default is the label that was defined implicitly for the domain.
+
+Examples:
+
+    # Identical domain to (compatible with for conversion) SpaceAxes.
+    SpaceAxes2 = (SpaceAxes::X : {} | SpaceAxes::Y : {} | SpaceAxes::Z : {})
+    Dimensions = (SpaceAxes::X : {} | SpaceAxes::Y : {} | SpaceAxes::Z : {} | TimeAxis::T : {})
+    # The domain of point on any axis line (except it includes points at 0 on one axis as being different to points at 0 on another axis... this can be fixed using concepts introduced later).
+    PointsOnAxes = (XMetres | YMetres | ZMetres | TSeconds)
+
+### The Connection domain
+### The Subset domain
