@@ -138,6 +138,10 @@ In this document, a new ensemble domain E is denoted as:
 
     E = Ensemble label1 label2 label3
 
+Alternative, Ensembles with labels that are a range of numbers can be defined as:
+
+    E = Ensemble 10..100
+
 The labels become members of the namespace E, and the domain E can be used as if it was a disjoint union domain over those labels.
 
 In addition to explicitly declare ensemble domains, every domain has an implicit anonymous ensemble containing only one label. There is no way to reference this ensemble as a domain, but the labels can be referenced simply by using the domain name in a context where a label is expected. In the above example, E::label1 is a label in domain E, and E is a label in an anonymous domain. This specification has been designed so there can never be any ambiguity between the domain E and the label E.
@@ -241,4 +245,118 @@ Example:
       f :: Reals -> RealMetres
       f x = x / 1000
 
+## Field signature domain
+
+A field signature domain is the domain of all possible mappings between a domain and a codomain. It is represented using the following notation:
+
+    (Domain -> Codomain)
+
+For example, it can be used to define a vector of 100 elements:
+
+    ElID = Ensemble 1..100
+    HundredD = (ElID -> Reals)
+
+## Domain type parameters
+
+Any domain can be defined using one or more type parameters. For example, in the below, a is a type parameter, and the modeller can re-use HundredOf to refer to vectors of a hundred real, matrices that consist of a hundred vectors of real, or any other value of 'a':
+
+    HundredOf a = (ElID -> a)
+
+A domain with no type parameters is said to have kind *. A domain with one type parameter has kind (* -> *), and so on. A type parameter may be removed by applying a concrete type to a type parameter, simply by concatenating the type to be applied to the end. For example:
+
+    MyVector = CloneDomain X where
+                 X = HundredOf Real # HundredOf has kind * -> *, but HundredOf Real has kind *
+
+Note that type parameters can be used for static polymorphism, but they cannot be used for run-time type polymorphism. In this sense, they are like templates in C++ and type parameters in Haskell.
+
+## Domain classes
+
+Sometimes, it is useful to say that a number of domains (or a number of pairs or triples or so on) have some property in common; this may either be a domain or a field that can be retrieved for each such domain / pair / triple.
+
+For example, it might be useful to define a class of domains for which it is possible to check for equality. This is done by firstly defining a class, and then specifying that certain domains are members using an instance:
+
+    class Eq a where
+      # Every member of the class Eq must provide isEqual
+      isEqual :: { 0 : a, 1 : a } -> Boolean
+      # Note: no definition is provided above, only the signature.
+      notEqual :: { 0 : a, 1 : a } -> Boolean
+      # Here we provide a default implementation in terms of other class fields. It is still possible to override on 
+      # instances.
+      notEqual args = not (isEqual args)
+
+    # Now we define how Eq works for Real.
+    instance Eq Reals where
+      isEqual { 0 : x, 1 : y } = x == y # A bit circular here - probably this would be built in.
+
+We might then use it to define a metric...
+
+    class Metric a where
+       domain DistanceDomain
+       distance :: { 0 : a, 1 : a } -> DistanceDomain
+    L2Real = CloneDomain Real
+    instance Metric L2Real where
+       DistanceDomain = Real
+       distance { 0 : x, 1 : y } = (x-y)^2
+
+Field signatures and class signatures involving type parameters may include class constraints on the type parameters in the instance head, by prefixing class constraints before '=>'. For example:
+
+    TriplePosition = Ensemble Start Middle End
+    isEquispace :: (Metric a, Eq ((Metric a)::DistanceDomain)) => { TriplePosition::Start : a, TriplePosition::Middle : a, TriplePosition::End : a } -> Boolean
+    isEquispace {TriplePosition::Start = s, TriplePosition::Middle = m, TriplePosition::End = e} =
+      isEqual {0=(Metric::distance {0=s, 1=m}), 1=(Metric::distance {0=m, 1=e})}
+
 # Fields
+## Fields in general
+
+A field is a mapping from a domain to a codomain. They are synonymous with some other mathematical concepts: with functions, but also, in the case of fields with an ensemble domain and a scalar codomain, with vectors.
+
+It must be possible to compute, using the type inference rules defined below, a field signature domain corresponding to every field. This signature can be provided directly as a constraint on the type inference engine:
+
+    f :: Real -> Real
+
+## Inbuilt fields
+The following special keywords allow fields that are implicitly defined to be referenced. The keywords are not, by themselves, fields.
+
+### The identity field
+
+The symbol id (possibly defined in a library, but useful for definitions, so included here as a builtin) is a field that returns whatever is passed into it.
+
+### The lookup field
+
+If l is a label on a product domain, then
+
+    lookup l
+
+is a field with field signature (a -> b) valid over a in the class of product domains that have a member with label l; b is determined from a as the domain matching label l in domain a.
+
+### The append field
+
+If l is a label on a product domain, then
+
+  append l
+
+is a field with field signature ({ product: a, add: b} -> c) valid over a in the class of product domains that do not have a member with label l. The domain of c is constrained to be the product domain of the same type as a except with an additional member with label l and domain matching the domain of b. The semantics are that a is modified to add b.
+
+### The merge field
+
+The following predefined field exists:
+
+    merge
+
+with field signature ({ 0 : a, 1 : b } -> c), valid over a and b in the class of product domains that do not have any labels in common. The type of c is determined from a and b to be the product domain that includes all labelled values from either of the arguments.
+
+### The label field
+
+The following predefined field exists:
+
+    label
+
+with field signature (a -> b), valid over a in the class of disjoint union domains. The domain b is determined from a as the disjoint union of all the labels in a with the point domain.
+
+### The unionValue field
+
+The following predefined field exists:
+
+    unionValue
+
+with field signature (a -> b), valid over a in the class of disjoint union domains which are homogeneous in the sense that the domain associated with every label is the same.
