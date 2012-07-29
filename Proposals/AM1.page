@@ -152,7 +152,7 @@ Note: Boolean is a built in Ensemble domain that is available using the phrase '
 
 The product domain makes a domain which has as its value space the cartesian product of the value space of the parts, and as the label space, has the cartesian product of the label spaces of the parts. Each part has a named label. The labels must be scoped, and must have previously been defined using Ensemble domain constructors. It is not necessary that all labels were originally defined in the same ensemble.
 
-If you declare the exact same product domain twice (i.e. with the exact same labels and domains, where labels are determined to be the same by what label reference rather than by string comparison), you get an indistinguishable domain which can be used interchangeably.
+If you declare the exact same product domain twice (i.e. with the exact same labels and domains, where labels are determined to be the same by label reference rather than by string comparison), you get an indistinguishable domain which can be used interchangeably.
 
 In this document, the syntax { label1: domain1, label2: domain2, label3: domain3 } is used for product domains. The product domain over nothing ({}) is indistinguishable from the point domain. It is possible to define a product domain of only one thing, { label1: domain1 }. This is not identical to domain1, because it has a label (but can be converted, as discussed in another section).
 
